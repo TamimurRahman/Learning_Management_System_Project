@@ -119,7 +119,7 @@ def home_view(request):
 
 
 
-
+'''
 @api_view(['GET','POST'])
 def user_list_create(request):
     if request.method == 'GET':
@@ -138,4 +138,7 @@ def user_list_create(request):
             serializer.save()
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+'''
+
 
