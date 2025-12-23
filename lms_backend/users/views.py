@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view
 from .models import User
 from . import serializers
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import get_user_model, login, authenticate
+from django.contrib.auth import get_user_model, login, authenticate, logout
 from django.contrib import messages
 from core import models
 from django.views.decorators.csrf import csrf_protect
@@ -98,7 +98,21 @@ def dashboard_view(request):
 
         return render(request,'',context)
 
+def logout_view(request):
+    logout(request)
+    return render('')
 
+def home_view(request):
+    featured_courses = models.Course.objects.filter(is_active=True)
+    categories = models.Category.objects.filter(is_active=True)
+    context = {
+        'featured_courses':featured_courses,
+        'categories':categories,
+        'total_courses':featured_courses.count(),
+        'total_students':User.objects.filter(role='student').count(),
+        'total_teachers':User.objects.filter(role='teacher').count(),
+    }
+    return render(request,'',context)
 
 
 
