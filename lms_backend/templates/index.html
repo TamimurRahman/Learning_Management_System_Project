@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+
+
+
+{% block title %}Home - Pathshala{% endblock %}
+{% block content %}
+
+
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1>Learn Without Limits</h1>
+                    <p class="lead mb-4">Discover, learn, and grow with Pathshala. Join thousands of students and teachers in our interactive learning platform.</p>
+                    
+                    <!-- Hero Search Form -->
+                    <form class="search-form mb-4" action="{% url 'courses_list' %}" method="GET">
+                        <div class="input-group">
+                            <input type="text" name="search" class="form-control form-control-lg" placeholder="What do you want to learn today?">
+                            <button class="btn btn-primary" type="submit">Search</button>
+                        </div>
+                    </form>
+                    
+                    <div class="d-flex flex-wrap">
+                        <a href="{% url 'courses_list' %}" class="btn btn-light btn-lg me-3 mb-3">Explore Courses</a>
+                        {% if not user.is_authenticated %}
+                            <a href="{% url 'signup' %}?role=teacher" class="btn btn-outline-light btn-lg mb-3">Become a Teacher</a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1350&q=80" alt="Students learning online" class="img-fluid rounded shadow-lg">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Categories -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-4">Browse Categories</h2>
+            <div class="d-flex flex-wrap justify-content-center mb-4">
+                <a href="{% url 'courses_list' %}" class="category-pill bg-light active text-decoration-none">All</a>
+                {% for category in categories %}
+                    <a href="{% url 'courses_list' %}?category={{ category.id }}" class="category-pill bg-light text-decoration-none">{{ category.title }}</a>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Courses -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Featured Courses</h2>
+                <a href="{% url 'courses_list' %}" class="btn btn-outline-primary">View All Courses</a>
+            </div>
+            <div class="row g-4">
+                {% for course in featured_courses %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card course-card h-100">
+                            {% if course.banner %}
+                                <img src="{{ course.banner.url }}" class="card-img-top" alt="{{ course.title }}">
+                            {% else %}
+                                <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=240&q=80" class="card-img-top" alt="{{ course.title }}">
+                            {% endif %}
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="badge badge-category">{{ course.category_id.title }}</span>
+                                    <div class="rating">
+                                        {% for i in "12345"|make_list %}
+                                            <i class="fas fa-star"></i>
+                                        {% endfor %}
+                                        <span class="ms-1 text-dark">{{ course|course_rating }}</span>
+                                    </div>
+                                </div>
+                                <h5 class="card-title">
+                                    <a href="{% url 'course_detail' course.id %}" class="text-decoration-none text-dark">{{ course.title|truncate_words:8 }}</a>
+                                </h5>
+                                <p class="card-text">{{ course.description|truncate_words:15 }}</p>
+                                <div class="course-instructor mb-3">
+                                    {% user_avatar course.instructor_id 36 %}
+                                    <div class="ms-2">
+                                        <small class="text-muted">Instructor</small>
+                                        <p class="mb-0 fw-medium">{{ course.instructor_id.get_full_name|default:course.instructor_id.username }}</p>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold text-primary">{{ course.price|format_price }}</span>
+                                    <a href="{% url 'course_detail' course.id %}" class="btn btn-sm btn-primary">
+                                        {% if user|is_enrolled:course %}
+                                            Continue Learning
+                                        {% else %}
+                                            View Course
+                                        {% endif %}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">How Pathshala Works</h2>
+            <div class="row g-4">
+                <!-- Admin Role -->
+                <div class="col-md-4">
+                    <div class="card role-card">
+                        <div class="role-icon">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <h3>For Admins</h3>
+                        <ul class="text-start">
+                            <li>Manage users and assign roles</li>
+                            <li>Create and organize course categories</li>
+                            <li>Access platform-wide statistics</li>
+                            <li>Moderate content and maintain quality</li>
+                        </ul>
+                        {% if user.role == 'admin' %}
+                            <a href="{% url 'dashboard' %}" class="btn btn-outline-primary mt-3">Admin Dashboard</a>
+                        {% else %}
+                            <a href="#" class="btn btn-outline-primary mt-3">Admin Portal</a>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Teacher Role -->
+                <div class="col-md-4">
+                    <div class="card role-card">
+                        <div class="role-icon">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <h3>For Teachers</h3>
+                        <ul class="text-start">
+                            <li>Create and manage your courses</li>
+                            <li>Upload lessons and learning materials</li>
+                            <li>Track student progress</li>
+                            <li>Interact with your students</li>
+                        </ul>
+                        {% if user.role == 'teacher' %}
+                            <a href="{% url 'teacher_courses' %}" class="btn btn-outline-primary mt-3">My Courses</a>
+                        {% else %}
+                            <a href="{% url 'signup' %}?role=teacher" class="btn btn-outline-primary mt-3">Become a Teacher</a>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Student Role -->
+                <div class="col-md-4">
+                    <div class="card role-card">
+                        <div class="role-icon">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <h3>For Students</h3>
+                        <ul class="text-start">
+                            <li>Discover and enroll in courses</li>
+                            <li>Learn at your own pace</li>
+                            <li>Track your learning progress</li>
+                            <li>Earn certificates of completion</li>
+                        </ul>
+                        {% if user.role == 'student' %}
+                            <a href="{% url 'dashboard' %}" class="btn btn-outline-primary mt-3">My Dashboard</a>
+                        {% else %}
+                            <a href="{% url 'signup' %}?role=student" class="btn btn-outline-primary mt-3">Start Learning</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics -->
+    <section class="stats-section">
+        <div class="container">
+            <h2 class="text-center mb-5">Pathshala by the Numbers</h2>
+            <div class="row text-center">
+                <div class="col-md-3 col-6 mb-4">
+                    <div class="stat-value">{{ total_courses|default:"500+" }}</div>
+                    <div class="stat-label">Courses</div>
+                </div>
+                <div class="col-md-3 col-6 mb-4">
+                    <div class="stat-value">{{ total_teachers|default:"150+" }}</div>
+                    <div class="stat-label">Expert Teachers</div>
+                </div>
+                <div class="col-md-3 col-6 mb-4">
+                    <div class="stat-value">{{ total_students|default:"25,000+" }}</div>
+                    <div class="stat-label">Students</div>
+                </div>
+                <div class="col-md-3 col-6 mb-4">
+                    <div class="stat-value">98%</div>
+                    <div class="stat-label">Satisfaction Rate</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-5 bg-primary text-white">
+        <div class="container text-center">
+            <h2 class="mb-4">Ready to Start Your Learning Journey?</h2>
+            <p class="lead mb-4">Join thousands of students and teachers on Pathshala today.</p>
+            <div class="d-flex flex-wrap justify-content-center">
+                <a href="{% url 'courses_list' %}" class="btn btn-light btn-lg me-3 mb-3">Browse Courses</a>
+                {% if not user.is_authenticated %}
+                    <a href="{% url 'signup' %}" class="btn btn-outline-light btn-lg mb-3">Sign Up for Free</a>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+{% endblock %}

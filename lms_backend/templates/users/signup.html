@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign Up - Pathshala{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card auth-card">
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <h4 class="text-center mb-4">Create An Account</h4>
+                            {% if form.errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    {% for field, errors in form.errors.items %}
+                                        {% for error in errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Select Role -->
+                        <div class="mb-4">
+                            <label class="form-label">I want to join as:</label>
+                            <div class="role-selector d-flex gap-3">
+                                <div class="role-card {% if request.GET.role == 'student' or not request.GET.role %}selected{% endif %}" 
+                                     onclick="selectRole('student')" tabindex="0" role="button">
+                                    <i class="fas fa-user-graduate role-icon"></i>
+                                    <h6>Student</h6>
+                                </div>
+                                <div class="role-card {% if request.GET.role == 'teacher' %}selected{% endif %}" 
+                                     onclick="selectRole('teacher')" tabindex="0" role="button">
+                                    <i class="fas fa-chalkboard-teacher role-icon"></i>
+                                    <h6>Teacher</h6>
+                                </div>
+                            </div>
+                            <input type="hidden" name="role" value="{% if request.GET.role %}{{ request.GET.role }}{% else %}student{% endif %}">
+                        </div>
+
+                        <!-- Name Fields -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-user"></i>
+                                    </span>
+                                    <input type="text" class="form-control" name="first_name" placeholder="First Name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-user"></i>
+                                    </span>
+                                    <input type="text" class="form-control" name="last_name" placeholder="Last Name" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Username and Email -->
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">
+                                <i class="fas fa-user-circle"></i>
+                            </span>
+                            <input type="text" class="form-control" name="username" placeholder="Username" required>
+                        </div>
+
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                            <input type="email" class="form-control" name="email" placeholder="Email Address" required>
+                        </div>
+
+                        <!-- Password Fields -->
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            <input type="password" class="form-control" name="password" placeholder="Password" required>
+                        </div>
+
+                        <div class="input-group mb-4">
+                            <span class="input-group-text">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            <input type="password" class="form-control" name="password_confirm" placeholder="Confirm Password" required>
+                        </div>
+
+                        <!-- Terms and Conditions -->
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" required>
+                            <label class="form-check-label">
+                                I agree to the <a href="#" class="text-decoration-none">Terms of Service</a> and
+                                <a href="#" class="text-decoration-none">Privacy Policy</a>
+                            </label>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-user-plus me-2"></i> Register Account
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer">
+                    <div class="text-center">
+                        <span class="text-muted">Already have an account?</span>
+                        <a href="{% url 'login' %}" class="text-decoration-none">Login Here</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.auth-card {
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border: none;
+}
+
+.role-card {
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 0.75rem;
+    transition: all 0.3s;
+    user-select: none;
+    flex: 1;
+}
+
+.role-card:hover {
+    border-color: var(--primary);
+    background-color: rgba(94, 114, 228, 0.05);
+}
+
+.role-card.selected {
+    border-color: var(--primary);
+    background-color: rgba(94, 114, 228, 0.1);
+}
+
+.role-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary);
+}
+
+.input-group-text {
+    background-color: var(--light);
+    border-right: none;
+}
+
+.input-group .form-control {
+    border-left: none;
+}
+
+.input-group .form-control:focus {
+    box-shadow: 0 0 0 0.2rem rgba(94, 114, 228, 0.25);
+    border-color: var(--primary);
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function selectRole(role) {
+    document.querySelector('input[name="role"]').value = role;
+    document.querySelectorAll('.role-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    event.target.closest('.role-card').classList.add('selected');
+}
+</script>
+{% endblock %}

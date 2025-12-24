@@ -14,11 +14,12 @@ from django.views.decorators.csrf import csrf_protect
 
 
 User = get_user_model()
+@csrf_protect
 def signup_view(request):
     if request.method == 'GET':
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             return redirect('dashboard')
-        return render(request,'')
+        return render(request,'users/signup.html')
     
     elif request.method == 'POST':
         first_name = request.POST.get('first_name')
@@ -31,13 +32,13 @@ def signup_view(request):
 
         if password != password_confirm:
             messages.error(request,'Password do not match!')
-            return render(request,'')
+            return render(request,'users/signup.html')
         if User.objects.filter(username=username).exists():
             messages.error(request,'Username already exists!')
-            return render(request,'')
+            return render(request,'users/signup.html')
         if User.objects.filter(email=email).exists():
             messages.error(request,'Email already exists!')
-            return render(request,'')
+            return render(request,'users/signup.html')
         user = User.objects.create_user(
 
             username = username,
@@ -49,6 +50,7 @@ def signup_view(request):
         )
         login(request,user)
         return redirect('dashboard')
+    return render(request,'users/signup.html')
         
 
 @csrf_protect
@@ -84,7 +86,7 @@ def dashboard_view(request):
             'total_students':total_students,
             'total_hours':sum([course.duration for course in teacher_courses])
         })
-        return render(request,'',context)
+        return render(request,'users/teacher_dashboard.html',context)
     else:
         enrollments = models.Enrollment.objects.filter(student_id = user)
         completed_course = enrollments.filter(is_completed=True).count()
@@ -96,7 +98,7 @@ def dashboard_view(request):
             'total_hours':sum([e.course_id.duration for e in enrollments if e.is_completed ])
         })
 
-        return render(request,'',context)
+        return render(request,'users/student_dashboard.html',context)
 
 def logout_view(request):
     logout(request)
@@ -112,7 +114,7 @@ def home_view(request):
         'total_students':User.objects.filter(role='student').count(),
         'total_teachers':User.objects.filter(role='teacher').count(),
     }
-    return render(request,'',context)
+    return render(request,'index.html',context)
 
 
 

@@ -1,0 +1,312 @@
+{% extends 'base.html' %}
+
+{% block title %}Teacher Dashboard - Pathshala{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        
+                        <div class="ms-3">
+                            <h2 class="mb-1">Welcome back, {{ user.first_name|default:user.username }}!</h2>
+                            <p class="mb-0">Manage your courses and track student progress</p>
+                        </div>
+                        <div class="ms-auto">
+                            <a href="{% url 'teacher_create_course' %}" class="btn btn-light">
+                                <i class="fas fa-plus me-2"></i>Create New Course
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="stat-value text-primary">{{ total_courses }}</div>
+                    <div class="stat-label">My Courses</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="stat-value text-success">{{ total_students }}</div>
+                    <div class="stat-label">Total Students</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="stat-value text-warning">{{ total_hours|floatformat:0 }}</div>
+                    <div class="stat-label">Content Hours</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="stat-value text-info">4.8</div>
+                    <div class="stat-label">Avg. Rating</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 col-6 mb-3">
+                            <a href="{% url 'teacher_create_course' %}" class="btn btn-outline-primary w-100 p-3">
+                                <i class="fas fa-plus fa-2x mb-2"></i>
+                                <div>Create Course</div>
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <a href="{% url 'teacher_courses' %}" class="btn btn-outline-success w-100 p-3">
+                                <i class="fas fa-book fa-2x mb-2"></i>
+                                <div>My Courses</div>
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <a href="#" class="btn btn-outline-info w-100 p-3">
+                                <i class="fas fa-users fa-2x mb-2"></i>
+                                <div>Students</div>
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <a href="#" class="btn btn-outline-warning w-100 p-3">
+                                <i class="fas fa-chart-line fa-2x mb-2"></i>
+                                <div>Analytics</div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Courses -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">My Courses</h5>
+                    <a href="{% url 'teacher_courses' %}" class="btn btn-outline-primary btn-sm">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if courses %}
+                        <div class="row">
+                            {% for course in courses|slice:":6" %}
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <div class="card h-100">
+                                        {% if course.banner %}
+                                            <img src="{{ course.banner.url }}" class="card-img-top" style="height: 150px; object-fit: cover;" alt="{{ course.title }}">
+                                        {% else %}
+                                            <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=150&q=80" class="card-img-top" style="height: 150px; object-fit: cover;" alt="{{ course.title }}">
+                                        {% endif %}
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <a href="{% url 'course_detail' course.id %}" class="text-decoration-none">{{ course.title }}</a>
+                                            </h6>
+                                            <p class="card-text text-muted small">{{ course.description }}</p>
+                                            
+                                            <!-- Course Stats -->
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-users me-1"></i>
+                                                    {{ course.enrollment_set.count }} students
+                                                </small>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-clock me-1"></i>
+                                                    {{ course.duration }}
+                                                </small>
+                                            </div>
+                                            
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                {% if course.is_active %}
+                                                    <span class="badge bg-success">Published</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning">Draft</span>
+                                                {% endif %}
+                                                <div>
+                                                    <a href="{% url 'teacher_edit_course' course.id %}" class="btn btn-outline-primary btn-sm">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a href="{% url 'teacher_course_students' course.id %}" class="btn btn-outline-info btn-sm">
+                                                        <i class="fas fa-users"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-chalkboard-teacher fa-4x text-muted mb-3"></i>
+                            <h5>No courses yet</h5>
+                            <p class="text-muted">Create your first course to start teaching</p>
+                            <a href="{% url 'teacher_create_course' %}" class="btn btn-primary">Create Course</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity & Analytics -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Activity</h5>
+                </div>
+                <div class="card-body">
+                    <div class="activity-feed">
+                        {% for course in courses|slice:":5" %}
+                            <div class="activity-item d-flex align-items-center mb-3">
+                                <div class="activity-icon me-3">
+                                    <i class="fas fa-book text-primary"></i>
+                                </div>
+                                <div>
+                                    <div class="activity-title">
+                                        Course <a href="{% url 'course_detail' course.id %}" class="text-decoration-none">{{ course.title }}</a>
+                                        {% if course.is_active %}published{% else %}created{% endif %}
+                                    </div>
+                                    <div class="activity-time text-muted small">{{ course.created_at }} ago</div>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="text-center py-3">
+                                <i class="fas fa-clock fa-2x text-muted mb-2"></i>
+                                <p class="text-muted">No recent activity</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Student Engagement</h5>
+                </div>
+                <div class="card-body">
+                    <div class="engagement-stats">
+                        <div class="stat-item d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <div class="stat-title">Total Enrollments</div>
+                                <div class="stat-subtitle text-muted">All courses</div>
+                            </div>
+                            <div class="stat-value text-primary">{{ total_students }}</div>
+                        </div>
+                        
+                        <div class="stat-item d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <div class="stat-title">Active Students</div>
+                                <div class="stat-subtitle text-muted">Last 30 days</div>
+                            </div>
+                            <div class="stat-value text-success">{{ total_students }}</div>
+                        </div>
+                        
+                        <div class="stat-item d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <div class="stat-title">Course Completion Rate</div>
+                                <div class="stat-subtitle text-muted">Average across all courses</div>
+                            </div>
+                            <div class="stat-value text-info">68%</div>
+                        </div>
+                        
+                        <div class="stat-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="stat-title">Student Satisfaction</div>
+                                <div class="stat-subtitle text-muted">Average rating</div>
+                            </div>
+                            <div class="stat-value text-warning">4.8/5</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--dark);
+}
+
+.activity-icon {
+    font-size: 1.2rem;
+}
+
+.activity-title {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.stat-item .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.stat-title {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.stat-subtitle {
+    font-size: 0.875rem;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-success:hover,
+.btn-outline-info:hover,
+.btn-outline-warning:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.quick-action-btn {
+    transition: all 0.3s ease;
+}
+</style>
+{% endblock %}
